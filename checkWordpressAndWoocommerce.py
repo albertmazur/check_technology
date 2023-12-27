@@ -6,7 +6,7 @@ import csv
 
 def addhttp(url):
     if not url.startswith('http'):
-        url = 'https://' + url
+        url = 'http://' + url
     if url.endswith('/'):
         url = url[:-1]
     return url
