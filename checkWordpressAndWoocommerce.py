@@ -4,13 +4,16 @@ import re
 import csv
 
 
+def addhttp(url):
+    if not url.startswith('http'):
+        url = 'https://' + url
+    if url.endswith('/'):
+        url = url[:-1]
+    return url
+
 def check_wordpress_in_robots_txt(url):
     try:
-        if not url.startswith('http'):
-            url = 'http://' + url
-        if url.endswith('/'):
-            url = url[:-1]
-
+        print(url)
         response = requests.get(url + '/robots.txt')
         if response.status_code == 200 and 'wp-admin' in response.text:
             return True
@@ -73,13 +76,14 @@ def check_woocommerce_and_version(url):
         return False, None
 
 
-path_input = '/home/albert/Dokumenty/EfficientWeb.csv'
-path_output = '/home/albert/Dokumenty/website-results.csv'
+row_url = 0
+path_input = 'google_domains.csv'
+path_output = 'website-results.csv'
 
 with open(path_input, newline='', encoding='utf-8') as csvfile:
     reader = csv.reader(csvfile)
     next(reader)
-    list_url = [row[3] for row in reader]
+    list_url = [row[row_url] for row in reader]
 
 with open(path_output, mode='w', newline='', encoding='utf-8') as csvfile:
     writer = csv.writer(csvfile)
@@ -87,6 +91,7 @@ with open(path_output, mode='w', newline='', encoding='utf-8') as csvfile:
 
     for index, url in enumerate(list_url, start=1):
         try:
+            url = addhttp(url)
             is_wp, wp_version = check_wordpress_meta_tag(url)
             is_wp2 = check_wordpress_in_robots_txt(url)
             is_wc, wc_version = check_woocommerce_and_version(url)
