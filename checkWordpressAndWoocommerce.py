@@ -11,6 +11,7 @@ def addhttp(url):
         url = url[:-1]
     return url
 
+
 def check_wordpress_in_robots_txt(url):
     try:
         print(url)
@@ -76,14 +77,25 @@ def check_woocommerce_and_version(url):
         return False, None
 
 
+def read_urls_from_txt(file_path):
+    with open(file_path, 'r', encoding='utf-8') as file:
+        return [line.strip() for line in file if line.strip()]
+
+
 row_url = 0
-path_input = 'google_domains.csv'
+path_input = 'pl.txt'
 path_output = 'website-results.csv'
 
-with open(path_input, newline='', encoding='utf-8') as csvfile:
-    reader = csv.reader(csvfile)
-    next(reader)
-    list_url = [row[row_url] for row in reader]
+file_extension = path_input.split('.')[-1].lower()
+if file_extension == 'csv':
+    with open(path_input, newline='', encoding='utf-8') as csvfile:
+        reader = csv.reader(csvfile)
+        next(reader)  # skip header
+        list_url = [row[row_url] for row in reader]
+elif file_extension == 'txt':
+    list_url = read_urls_from_txt(path_input)
+else:
+    raise ValueError("Unsupported file format. Please use a .csv or .txt file.")
 
 with open(path_output, mode='w', newline='', encoding='utf-8') as csvfile:
     writer = csv.writer(csvfile)
