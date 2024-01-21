@@ -3,8 +3,12 @@ from bs4 import BeautifulSoup
 import re
 import csv
 
+row_url = 0
+path_input = 'pl.txt'
+path_output = 'website-results.csv'
 
-def addhttp(url):
+
+def addHttp(url):
     if not url.startswith('http'):
         url = 'http://' + url
     if url.endswith('/'):
@@ -12,79 +16,58 @@ def addhttp(url):
     return url
 
 
-def check_wordpress_in_robots_txt(url):
-    try:
-        print(url)
-        response = requests.get(url + '/robots.txt')
-        if response.status_code == 200 and 'wp-admin' in response.text:
-            return True
-        return False
-    except requests.RequestException as e:
-        print(f"Błąd podczas łączenia: {e}")
-        return False
-
-
 def check_wordpress_meta_tag(url):
-    try:
-        response = requests.get(url)
-        if response.status_code == 200:
-            soup = BeautifulSoup(response.text, 'html.parser')
-            meta_tag = soup.find('meta', attrs={'name': 'generator'})
-            if meta_tag and 'wordpress' in meta_tag.get('content', '').lower():
-                version_match = re.search(r'wordpress\s*(\d+\.\d+(?:\.\d+)?)', meta_tag.get('content', ''),
-                                          re.IGNORECASE)
-                version = version_match.group(1) if version_match else ''
-                return True, version
-            return False, None
-    except requests.RequestException as e:
-        print(f"Błąd podczas łączenia: {e}")
-        return False, None
+    response = requests.get(url, timeout=60)
+    if response.status_code == 200:
+        soup = BeautifulSoup(response.text, 'html.parser')
+        meta_tag = soup.find('meta', attrs={'name': 'generator'})
+        if meta_tag is not None and 'wordpress' in meta_tag.get('content', '').lower():
+            version_match = re.search(r'wordpress\s*(\d+\.\d+(?:\.\d+)?)', meta_tag.get('content', ''),
+                                      re.IGNORECASE)
+            version = version_match.group(1) if version_match else ''
+            return True, version
+    return False, None
 
 
-def check_woocommerce_js(url):
-    try:
-        response = requests.get(url)
-        if response.status_code == 200:
-            soup = BeautifulSoup(response.text, 'html.parser')
-            body_tag = soup.find('body')
-            if body_tag and 'woocommerce-js' in body_tag.get('class', []):
-                return True
-        return False
-    except requests.RequestException as e:
-        print(f"Błąd podczas łączenia: {e}")
-        return False
+def check_wordpress_in_robots_txt(url):
+    response = requests.get(url + '/robots.txt')
+    if response.status_code == 200 and 'wp-admin' in response.text:
+        return True
+    return False
 
 
 def check_woocommerce_and_version(url):
-    try:
-        is_w = False
-        version = None
-        response = requests.get(url)
-        if response.status_code == 200:
-            soup = BeautifulSoup(response.text, 'html.parser')
-            for script in soup.find_all('script', src=True):
-                if '/woocommerce/' in script['src']:
-                    version_match = re.search(r'wc.(\d+\.\d+\.\d+)', script['src'])
-                    version = version_match.group(1) if version_match else None
-                    is_w = True
-                    if version != '':
-                        break
-            if is_w:
-                return True, version
-            return False, None
-    except requests.RequestException as e:
-        print(f"Błąd podczas łączenia: {e}")
-        return False, None
+    is_w = False
+    version = None
+    response = requests.get(url, timeout=60)
+    if response.status_code == 200:
+        soup = BeautifulSoup(response.text, 'html.parser')
+        for script in soup.find_all('script', src=True):
+            if '/woocommerce/' in script['src']:
+                version_match = re.search(r'wc.(\d+\.\d+\.\d+)', script['src'])
+                version = version_match.group(1) if version_match else None
+                is_w = True
+                if version != '':
+                    break
+        if is_w:
+            return True, version
+    return False, None
+
+
+def check_woocommerce_js(url):
+    response = requests.get(url, timeout=60)
+    if response.status_code == 200:
+        soup = BeautifulSoup(response.text, 'html.parser')
+        body_tag = soup.find('body')
+        if body_tag and 'woocommerce-js' in body_tag.get('class', []):
+            return True
+    return False
 
 
 def read_urls_from_txt(file_path):
     with open(file_path, 'r', encoding='utf-8') as file:
         return [line.strip() for line in file if line.strip()]
 
-
-row_url = 0
-path_input = 'pl.txt'
-path_output = 'website-results.csv'
 
 file_extension = path_input.split('.')[-1].lower()
 if file_extension == 'csv':
@@ -102,16 +85,17 @@ with open(path_output, mode='w', newline='', encoding='utf-8') as csvfile:
     writer.writerow(["URL", "IS WordPress", "Version WordPress", "IS WooCommerce", "Version WooCommerce"])
 
     for index, url in enumerate(list_url, start=1):
+        print(url)
         try:
-            url = addhttp(url)
+            url = addHttp(url)
             is_wp, wp_version = check_wordpress_meta_tag(url)
             is_wp2 = check_wordpress_in_robots_txt(url)
             is_wc, wc_version = check_woocommerce_and_version(url)
             is_wc2 = check_woocommerce_js(url)
             if is_wc:
                 is_wp = True
-        except:
-            print("Błąd odczytu")
+        except requests.RequestException as e:
+            print("Brak dostępu do strony: " + str(e))
 
         main_is_wp = is_wp or is_wp2
         main_is_wc = is_wc or is_wc
