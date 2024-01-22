@@ -9,15 +9,14 @@ path_output = 'website-results.csv'
 
 
 def addHttp(url):
-    if not url.startswith('http'):
+    if not url.startswith('http') or not url.startswith('https'):
         url = 'http://' + url
     if url.endswith('/'):
         url = url[:-1]
     return url
 
 
-def check_wordpress_meta_tag(url):
-    response = requests.get(url, timeout=60)
+def check_wordpress_meta_tag(response):
     if response.status_code == 200:
         soup = BeautifulSoup(response.text, 'html.parser')
         meta_tag = soup.find('meta', attrs={'name': 'generator'})
@@ -29,17 +28,15 @@ def check_wordpress_meta_tag(url):
     return False, None
 
 
-def check_wordpress_in_robots_txt(url):
-    response = requests.get(url + '/robots.txt')
+def check_wordpress_in_robots_txt(response):
     if response.status_code == 200 and 'wp-admin' in response.text:
         return True
     return False
 
 
-def check_woocommerce_and_version(url):
+def check_woocommerce_and_version(response):
     is_w = False
     version = None
-    response = requests.get(url, timeout=60)
     if response.status_code == 200:
         soup = BeautifulSoup(response.text, 'html.parser')
         for script in soup.find_all('script', src=True):
@@ -54,8 +51,7 @@ def check_woocommerce_and_version(url):
     return False, None
 
 
-def check_woocommerce_js(url):
-    response = requests.get(url, timeout=60)
+def check_woocommerce_js(response):
     if response.status_code == 200:
         soup = BeautifulSoup(response.text, 'html.parser')
         body_tag = soup.find('body')
@@ -87,11 +83,11 @@ with open(path_output, mode='w', newline='', encoding='utf-8') as csvfile:
     for index, url in enumerate(list_url, start=1):
         print(url)
         try:
-            url = addHttp(url)
-            is_wp, wp_version = check_wordpress_meta_tag(url)
-            is_wp2 = check_wordpress_in_robots_txt(url)
-            is_wc, wc_version = check_woocommerce_and_version(url)
-            is_wc2 = check_woocommerce_js(url)
+            response = requests.get(addHttp(url), timeout=60)
+            is_wp, wp_version = check_wordpress_meta_tag(response)
+            is_wp2 = check_wordpress_in_robots_txt(response)
+            is_wc, wc_version = check_woocommerce_and_version(response)
+            is_wc2 = check_woocommerce_js(response)
             if is_wc:
                 is_wp = True
         except requests.RequestException as e:
