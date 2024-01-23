@@ -6,8 +6,8 @@ import csv
 column_url = 0
 path_input = 'pl.txt'
 path_output = 'website-results.csv'
-start_line = 1
-end_line = None
+start_line = 73680
+count_line = 10000
 
 
 def addHttp(url):
@@ -31,7 +31,7 @@ def check_wordpress_meta_tag(response):
 
 
 def check_wordpress_in_robots_txt(url):
-    response = requests.get(url + '/robots.txt')
+    response = requests.get(url + '/robots.txt', timeout=60)
     if response.status_code == 200 and 'wp-admin' in response.text:
         return True
     return False
@@ -63,11 +63,10 @@ def check_woocommerce_js(response):
     return False
 
 
-def read_urls_from_txt(file_path, start_line=1, end_line=None):
+def read_urls_from_txt(file_path, start_line=1, count_line=None):
     with open(file_path, 'r', encoding='utf-8') as file:
         lines = file.readlines()
-        if end_line is None:
-            end_line = len(lines)
+        end_line = (start_line-1) + count_line if count_line is not None else len(lines)
         return [line.strip() for line in lines[start_line-1:end_line] if line.strip()]
 
 
@@ -76,9 +75,9 @@ if file_extension == 'csv':
     with open(path_input, newline='', encoding='utf-8') as csvfile:
         reader = csv.reader(csvfile)
         next(reader)  # skip header
-        list_url = [row[column_url] for row in reader][start_line-1:end_line if end_line is not None else None]
+        list_url = [row[column_url] for row in reader][start_line-1:start_line-1+count_line]
 elif file_extension == 'txt':
-    list_url = read_urls_from_txt(path_input, start_line, end_line)
+    list_url = read_urls_from_txt(path_input, start_line, count_line)
 else:
     raise ValueError("Unsupported file format. Please use a .csv or .txt file.")
 
@@ -86,8 +85,13 @@ with open(path_output, mode='w', newline='', encoding='utf-8') as csvfile:
     writer = csv.writer(csvfile)
     writer.writerow(["URL", "IS WordPress", "Version WordPress", "IS WooCommerce", "Version WooCommerce"])
 
+    total_lines = start_line + count_line
     for index, url in enumerate(list_url, start=1):
         print(url)
+        is_wp = None
+        is_wp2 = None
+        is_wc = None
+        is_wc2 = None
         try:
             url = addHttp(url)
             response = requests.get(url, timeout=60)
@@ -109,6 +113,5 @@ with open(path_output, mode='w', newline='', encoding='utf-8') as csvfile:
         wc_result_version = f"{wc_version}" if main_is_wc and wc_version is not None else ""
 
         writer.writerow([url, wp_result, wp_result_version, wc_result, wc_result_version])
-
-        progress = (index / len(list_url)) * 100
-        print(f"Przetworzono {index}/{len(list_url)} ({progress:.2f}%)")
+        progress = (index / count_line) * 100
+        print(f"Przetworzono {start_line + index - 1}/{total_lines} ({progress:.2f}%)")
