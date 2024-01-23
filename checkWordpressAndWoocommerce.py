@@ -6,10 +6,12 @@ import csv
 column_url = 0
 path_input = 'pl.txt'
 path_output = 'website-results.csv'
+start_line = 1
+end_line = None
 
 
 def addHttp(url):
-    if not url.startswith('http') or not url.startswith('https'):
+    if not url.startswith('http') and not url.startswith('https'):
         url = 'http://' + url
     if url.endswith('/'):
         url = url[:-1]
@@ -61,9 +63,12 @@ def check_woocommerce_js(response):
     return False
 
 
-def read_urls_from_txt(file_path):
+def read_urls_from_txt(file_path, start_line=1, end_line=None):
     with open(file_path, 'r', encoding='utf-8') as file:
-        return [line.strip() for line in file if line.strip()]
+        lines = file.readlines()
+        if end_line is None:
+            end_line = len(lines)
+        return [line.strip() for line in lines[start_line-1:end_line] if line.strip()]
 
 
 file_extension = path_input.split('.')[-1].lower()
@@ -71,9 +76,9 @@ if file_extension == 'csv':
     with open(path_input, newline='', encoding='utf-8') as csvfile:
         reader = csv.reader(csvfile)
         next(reader)  # skip header
-        list_url = [row[column_url] for row in reader]
+        list_url = [row[column_url] for row in reader][start_line-1:end_line if end_line is not None else None]
 elif file_extension == 'txt':
-    list_url = read_urls_from_txt(path_input)
+    list_url = read_urls_from_txt(path_input, start_line, end_line)
 else:
     raise ValueError("Unsupported file format. Please use a .csv or .txt file.")
 
@@ -96,7 +101,7 @@ with open(path_output, mode='w', newline='', encoding='utf-8') as csvfile:
             print("Brak dostępu do strony: " + str(e))
 
         main_is_wp = is_wp or is_wp2
-        main_is_wc = is_wc or is_wc
+        main_is_wc = is_wc or is_wc2
 
         wp_result = f"WordPress" if main_is_wp else ""
         wp_result_version = f"{wp_version}" if main_is_wp and wp_version is not None else ""
