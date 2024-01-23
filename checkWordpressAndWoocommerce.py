@@ -3,7 +3,7 @@ from bs4 import BeautifulSoup
 import re
 import csv
 
-row_url = 0
+column_url = 0
 path_input = 'pl.txt'
 path_output = 'website-results.csv'
 
@@ -28,7 +28,8 @@ def check_wordpress_meta_tag(response):
     return False, None
 
 
-def check_wordpress_in_robots_txt(response):
+def check_wordpress_in_robots_txt(url):
+    response = requests.get(url + '/robots.txt')
     if response.status_code == 200 and 'wp-admin' in response.text:
         return True
     return False
@@ -70,7 +71,7 @@ if file_extension == 'csv':
     with open(path_input, newline='', encoding='utf-8') as csvfile:
         reader = csv.reader(csvfile)
         next(reader)  # skip header
-        list_url = [row[row_url] for row in reader]
+        list_url = [row[column_url] for row in reader]
 elif file_extension == 'txt':
     list_url = read_urls_from_txt(path_input)
 else:
@@ -83,9 +84,10 @@ with open(path_output, mode='w', newline='', encoding='utf-8') as csvfile:
     for index, url in enumerate(list_url, start=1):
         print(url)
         try:
-            response = requests.get(addHttp(url), timeout=60)
+            url = addHttp(url)
+            response = requests.get(url, timeout=60)
             is_wp, wp_version = check_wordpress_meta_tag(response)
-            is_wp2 = check_wordpress_in_robots_txt(response)
+            is_wp2 = check_wordpress_in_robots_txt(url)
             is_wc, wc_version = check_woocommerce_and_version(response)
             is_wc2 = check_woocommerce_js(response)
             if is_wc:
