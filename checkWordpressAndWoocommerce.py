@@ -5,8 +5,8 @@ import csv
 
 column_url = 0
 path_input = 'pl.txt'
-path_output = 'website-results.csv'
-start_line = 73680
+path_output = 'website-results-4.csv'
+start_line = 100000
 count_line = 10000
 
 
