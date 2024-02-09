@@ -1,13 +1,14 @@
-import requests
 import csv
+import requests
 
-from chceckURL.wordpress import check_meta_tag, check_in_robots_txt, check_woocommerce_and_version, check_woocommerce_js
+from chceckURL.wordpress import check_in_robots_txt, check_meta_tag, check_woocommerce_and_version, \
+    check_woocommerce_js, wordpress_email
 
 column_url = 0
 path_input = 'pl.txt'
-path_output = 'website-results-4.csv'
+path_output = 'website-results-with-email.csv'
 start_line = 100000
-count_line = 10000
+count_line = 5000
 
 
 def addHttp(url):
@@ -38,7 +39,7 @@ else:
 
 with open(path_output, mode='w', newline='', encoding='utf-8') as csvfile:
     writer = csv.writer(csvfile)
-    writer.writerow(["URL", "IS WordPress", "Version WordPress", "IS WooCommerce", "Version WooCommerce"])
+    writer.writerow(["URL", "IS WordPress", "Version WordPress", "IS WooCommerce", "Version WooCommerce", "E-mail"])
 
     total_lines = start_line + count_line
     for index, url in enumerate(list_url, start=1):
@@ -55,19 +56,23 @@ with open(path_output, mode='w', newline='', encoding='utf-8') as csvfile:
             is_wp2 = check_in_robots_txt(responseRobots)
             is_wc, wc_version = check_woocommerce_and_version(response)
             is_wc2 = check_woocommerce_js(response)
+
             if is_wc:
                 is_wp = True
+            main_is_wp = is_wp or is_wp2
+            main_is_wc = is_wc or is_wc2
+
+            wp_email = wordpress_email(main_is_wp, url)
+
         except requests.RequestException as e:
             print("Brak dostępu do strony: " + str(e))
-
-        main_is_wp = is_wp or is_wp2
-        main_is_wc = is_wc or is_wc2
 
         wp_result = f"WordPress" if main_is_wp else ""
         wp_result_version = f"{wp_version}" if main_is_wp and wp_version is not None else ""
         wc_result = f"WooCommerce" if main_is_wc else ""
         wc_result_version = f"{wc_version}" if main_is_wc and wc_version is not None else ""
+        wp_result_email = f"{', '.join(wp_email)}" if wp_email is not None else ""
 
-        writer.writerow([url, wp_result, wp_result_version, wc_result, wc_result_version])
+        writer.writerow([url, wp_result, wp_result_version, wc_result, wc_result_version, wp_result_email])
         progress = (index / count_line) * 100
         print(f"Przetworzono {start_line + index - 1}/{total_lines} ({progress:.2f}%)")
