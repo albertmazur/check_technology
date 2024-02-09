@@ -1,7 +1,7 @@
 import requests
-from bs4 import BeautifulSoup
-import re
 import csv
+
+from chceckURL.wordpress import check_meta_tag, check_in_robots_txt, check_woocommerce_and_version, check_woocommerce_js
 
 column_url = 0
 path_input = 'pl.txt'
@@ -16,51 +16,6 @@ def addHttp(url):
     if url.endswith('/'):
         url = url[:-1]
     return url
-
-
-def check_wordpress_meta_tag(response):
-    if response.status_code == 200:
-        soup = BeautifulSoup(response.text, 'html.parser')
-        meta_tag = soup.find('meta', attrs={'name': 'generator'})
-        if meta_tag is not None and 'wordpress' in meta_tag.get('content', '').lower():
-            version_match = re.search(r'wordpress\s*(\d+\.\d+(?:\.\d+)?)', meta_tag.get('content', ''),
-                                      re.IGNORECASE)
-            version = version_match.group(1) if version_match else ''
-            return True, version
-    return False, None
-
-
-def check_wordpress_in_robots_txt(url):
-    response = requests.get(url + '/robots.txt', timeout=60)
-    if response.status_code == 200 and 'wp-admin' in response.text:
-        return True
-    return False
-
-
-def check_woocommerce_and_version(response):
-    is_w = False
-    version = None
-    if response.status_code == 200:
-        soup = BeautifulSoup(response.text, 'html.parser')
-        for script in soup.find_all('script', src=True):
-            if '/woocommerce/' in script['src']:
-                version_match = re.search(r'wc.(\d+\.\d+\.\d+)', script['src'])
-                version = version_match.group(1) if version_match else None
-                is_w = True
-                if version != '':
-                    break
-        if is_w:
-            return True, version
-    return False, None
-
-
-def check_woocommerce_js(response):
-    if response.status_code == 200:
-        soup = BeautifulSoup(response.text, 'html.parser')
-        body_tag = soup.find('body')
-        if body_tag and 'woocommerce-js' in body_tag.get('class', []):
-            return True
-    return False
 
 
 def read_urls_from_txt(file_path, start_line=1, count_line=None):
@@ -95,8 +50,9 @@ with open(path_output, mode='w', newline='', encoding='utf-8') as csvfile:
         try:
             url = addHttp(url)
             response = requests.get(url, timeout=60)
-            is_wp, wp_version = check_wordpress_meta_tag(response)
-            is_wp2 = check_wordpress_in_robots_txt(url)
+            responseRobots = requests.get(url + '/robots.txt', timeout=60)
+            is_wp, wp_version = check_meta_tag(response)
+            is_wp2 = check_in_robots_txt(responseRobots)
             is_wc, wc_version = check_woocommerce_and_version(response)
             is_wc2 = check_woocommerce_js(response)
             if is_wc:
