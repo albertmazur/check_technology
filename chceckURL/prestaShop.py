@@ -1,7 +1,7 @@
 from bs4 import BeautifulSoup
 
 
-def check_wordpress_in_robots_txt(response):
+def check_in_robots_txt(response):
     if response.status_code == 200 and 'Prestashop' in response.text:
         return True
     return False

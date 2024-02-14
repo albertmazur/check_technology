@@ -10,7 +10,7 @@ def check_script_class(response):
     return False
 
 
-def check_wordpress_in_robots_txt(response):
+def check_in_robots_txt(response):
     if response.status_code == 200 and '/joomla/administrator/' in response.text:
         return True
     return False
