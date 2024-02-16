@@ -1,9 +1,6 @@
-import csv
-import requests
-
-import untils
-from chceckURL import joomla, wordpress, prestaShop
-from untils import add_http, read_urls_from_txt, read_urls_from_csv
+from FileHandler import FileHandler
+from Url import Url
+from technology import Joomla, Wordpress, PrestaShop
 
 column_url = 0
 path_input = 'pl.txt'
@@ -12,16 +9,45 @@ start_line = 670000
 count_line = 100
 
 
-def main(url, verify):
-    if verify is True:
-        print(url)
+def check(page_home_url):
+    url = Url(page_home_url)
+    response = url.create_request()
+    response_robots = url.create_request('/robots.txt')
+    wordpress = Wordpress.Wordpress(response, response_robots)
+    joomla = Joomla.Joomla(response, response_robots)
+    presta_shop = PrestaShop.PrestaShop(response, response_robots)
+
+    if wordpress.is_that_wp:
+        return [wordpress.name, wordpress.wp_version, wordpress.wp_version]
+    elif joomla.is_that:
+        return [joomla.name]
+    elif presta_shop.is_that:
+        return [presta_shop.name]
+    else:
+        return []
+
+
+def main2():
+    file_handler = FileHandler(path_input, path_output, start_line, count_line, column_url)
+
+    file_handler.writer_header_to_csv(
+        ["URL", "Technology", "Version WordPress", "IS WooCommerce", "Version WooCommerce", "Company",
+         "E-mail"])
+
+    lines = file_handler.lines
+
+    for url in lines:
+        data = check(url)
+        file_handler.writer(data)
+
+"""
+def main():
     technology = None
     title = None
     emails = None
     try:
         url = add_http(url)
-        response = untils.create_request(url, verify)
-        response_robots = untils.create_request(url + '/robots.txt', verify)
+
         is_wp, wp_version = wordpress.check_meta_tag(response)
         is_wp2 = wordpress.check_in_robots_txt(response_robots)
         is_wc, wc_version = wordpress.check_woocommerce_and_version(response)
@@ -68,19 +94,7 @@ def main(url, verify):
         print("Brak dostępu do strony: " + str(e))
         writer.writerow([url])
 
-
-file_extension = path_input.split('.')[-1].lower()
-if file_extension == 'csv':
-    list_url = read_urls_from_csv(path_input, start_line, count_line, column_url)
-elif file_extension == 'txt':
-    list_url = read_urls_from_txt(path_input, start_line, count_line)
-else:
-    raise ValueError("Unsupported file format. Please use a .csv or .txt file.")
-
-with open(path_output, mode='w', newline='', encoding='utf-8') as csvfile:
-    writer = csv.writer(csvfile)
-    writer.writerow(["URL", "Technology", "Version WordPress", "IS WooCommerce", "Version WooCommerce", "Company", "E-mail"])
-
     total_lines = start_line + count_line
     for index, url in enumerate(list_url, start=1):
         main(url, True)
+"""
