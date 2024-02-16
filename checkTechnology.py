@@ -9,7 +9,7 @@ column_url = 0
 path_input = 'pl.txt'
 path_output = 'website-results.csv'
 start_line = 670000
-count_line = 300
+count_line = 100
 
 
 def main(url, verify):
@@ -51,10 +51,13 @@ def main(url, verify):
         wp_result_version = f"{wp_version}" if main_is_wp is True and wp_version is not None else ""
         wc_result = f"WooCommerce" if main_is_wc else ""
         wc_result_version = f"{wc_version}" if main_is_wc is True and wc_version is not None else ""
-        result_emails = f"{', '.join(emails)}" if emails is not None else ""
         result_title = title if title is not None else ""
 
-        writer.writerow([url, technology, wp_result_version, wc_result, wc_result_version, result_emails, result_title])
+        if emails is not None:
+            row_data = [url, technology, wp_result_version, wc_result, wc_result_version, result_title] + emails
+            writer.writerow(row_data)
+        else:
+            writer.writerow([url, technology, wp_result_version, wc_result, wc_result_version, result_title, ""])
         progress = (index / count_line) * 100
         print(f"Przetworzono {start_line + index - 1}/{total_lines} ({progress:.2f}%)")
 
@@ -76,7 +79,7 @@ else:
 
 with open(path_output, mode='w', newline='', encoding='utf-8') as csvfile:
     writer = csv.writer(csvfile)
-    writer.writerow(["URL", "Technology", "Version WordPress", "IS WooCommerce", "Version WooCommerce", "E-mail", "Company"])
+    writer.writerow(["URL", "Technology", "Version WordPress", "IS WooCommerce", "Version WooCommerce", "Company", "E-mail"])
 
     total_lines = start_line + count_line
     for index, url in enumerate(list_url, start=1):
