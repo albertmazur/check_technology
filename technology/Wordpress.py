@@ -28,16 +28,16 @@ class Wordpress(Base):
                                           re.IGNORECASE)
                 version = version_match.group(1) if version_match else ''
                 return True, version
-        return False, None
+        return False, ""
 
     def check_in_robots_txt(self):
-        if self.response.status_code == 200 and 'wp-admin' in self.response.text:
+        if self.response_robots.status_code == 200 and 'wp-admin' in self.response_robots.text:
             return True
         return False
 
     def check_woocommerce_and_version(self):
         is_w = False
-        version = None
+        version = ""
         if self.response.status_code == 200:
             soup = BeautifulSoup(self.response.text, 'html.parser')
             for script in soup.find_all('script', src=True):
@@ -49,7 +49,7 @@ class Wordpress(Base):
                         break
             if is_w:
                 return True, version
-        return False, None
+        return False, ""
 
     def check_woocommerce_js(self):
         if self.response.status_code == 200:
@@ -58,3 +58,7 @@ class Wordpress(Base):
             if body_tag and 'woocommerce-js' in body_tag.get('class', []):
                 return True
         return False
+
+    def get_result(self):
+        return [self.url.page_home, self.name, self.wp_version, "WooCommerce" if self.is_that_wc is True else "",
+                self.wc_version, self.get_title()] + self.get_emails()

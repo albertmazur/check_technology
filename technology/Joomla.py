@@ -17,6 +17,6 @@ class Joomla(Base):
         return False
 
     def check_in_robots_txt(self):
-        if self.response.status_code == 200 and '/joomla/administrator/' in self.response.text:
+        if self.response_robots.status_code == 200 and '/joomla/administrator/' in self.response_robots.text:
             return True
         return False

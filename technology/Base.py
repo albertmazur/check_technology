@@ -26,7 +26,8 @@ class Base:
                                     title_text,
                                     flags=re.IGNORECASE)
                 title_text = title_text.strip()
-                return title_text
+                return title_text if len(title_text)!=0 else "aaa"
+            return "aaa"
 
     def get_emails(self):
         emails_set = set()
@@ -57,7 +58,7 @@ class Base:
         check_page(self.url.create_request('/kontakt-2'))
         check_page(self.url.create_request('/skontaktuj-sie-z-nami'))
 
-        if emails_set:
-            return list(emails_set)
-        else:
-            return None
+        return list(emails_set) if emails_set else []
+
+    def get_result(self):
+        return [self.url.page_home, self.name, "", "", "",  self.get_title()]+self.get_emails()

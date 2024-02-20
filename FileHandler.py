@@ -34,10 +34,10 @@ class FileHandler:
             end_line = self.end_line if reader.line_num is None else self.end_line
             return [row[self.column_url] for row in reader][self.start_line:end_line]
 
-    def writer(self, data):
-        with open(self.path_output, mode='w', newline='', encoding='utf-8') as csvfile:
+    def writer(self, data, mode='a'):
+        with open(self.path_output, mode=mode, newline='', encoding='utf-8') as csvfile:
             writer = csv.writer(csvfile)
             writer.writerow(data)
 
     def writer_header_to_csv(self, header=None):
-        self.writer(header)
+        self.writer(header, mode='w')

@@ -1,4 +1,5 @@
 import requests
+from requests import Response
 
 
 class Url:
@@ -23,5 +24,9 @@ class Url:
         except requests.exceptions.SSLError:
             print("Nie działa SSL")
             return requests.get(page_url, headers=headers, timeout=30, verify=False)
-        except requests.RequestException as e:
-            print("Brak dostępu do strony: " + str(e))
+        except requests.RequestException:
+            print("Brak dostępu do strony")
+            response = Response
+            response.url = page_url
+            response.status_code = 404
+            return response
