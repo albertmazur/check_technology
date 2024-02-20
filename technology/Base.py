@@ -27,7 +27,7 @@ class Base:
                                     flags=re.IGNORECASE)
                 title_text = title_text.strip()
                 return title_text if len(title_text)!=0 else "aaa"
-            return "aaa"
+            return ""
 
     def get_emails(self):
         emails_set = set()
