@@ -28,7 +28,6 @@ def check(page_home_url):
     return [url.page_home]
 
 
-
 class Main:
     def __init__(self):
         load_dotenv()
