@@ -44,7 +44,7 @@ class Main:
         lines = file_handler.lines
         total_lines = self.start_line + self.count_line - 1
         for index, url in enumerate(lines):
-            progress = (index / self.count_line) * 100
+            progress = ((index + 1) / self.count_line) * 100
             print(f"Przetworzono {self.start_line + index}/{total_lines} ({progress:.2f}%)")
             data = check(url)
             file_handler.writer(data)
