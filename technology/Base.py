@@ -26,7 +26,7 @@ class Base:
                                     title_text,
                                     flags=re.IGNORECASE)
                 title_text = title_text.strip()
-                return title_text if len(title_text)!=0 else "aaa"
+                return title_text if len(title_text) != 0 else "aaa"
             return ""
 
     def get_emails(self):
@@ -61,4 +61,4 @@ class Base:
         return list(emails_set) if emails_set else []
 
     def get_result(self):
-        return [self.url.page_home, self.name, "", "", "",  self.get_title()]+self.get_emails()
+        return [self.url.page_home, self.name, "", "", "", self.get_title()]+self.get_emails()
