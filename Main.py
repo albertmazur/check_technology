@@ -4,7 +4,7 @@ from dotenv import load_dotenv
 
 from FileHandler import FileHandler
 from Url import Url
-from technology import Joomla, Wordpress, PrestaShop
+from technology import Joomla, Wordpress, PrestaShop, Magento
 
 
 def check(page_home_url):
@@ -14,18 +14,19 @@ def check(page_home_url):
     response = url.create_request()
     response_robots = url.create_request('/robots.txt')
 
-    wordpress = Wordpress.Wordpress(response, response_robots)
-    joomla = Joomla.Joomla(response, response_robots)
-    presta_shop = PrestaShop.PrestaShop(response, response_robots)
+    platforms = [
+        Wordpress.Wordpress(response, response_robots),
+        Joomla.Joomla(response, response_robots),
+        PrestaShop.PrestaShop(response, response_robots),
+        Magento.Magento(response),
+    ]
 
-    if wordpress.is_that_wp:
-        return wordpress.get_result()
-    elif joomla.is_that:
-        return joomla.get_result()
-    elif presta_shop.is_that:
-        return presta_shop.get_result()
-    else:
-        return [url.page_home]
+    for platform in platforms:
+        if platform.is_that:
+            return platform.get_result()
+
+    return [url.page_home]
+
 
 
 class Main:

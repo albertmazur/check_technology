@@ -16,7 +16,7 @@ class Wordpress(Base):
 
         if is_wc:
             is_wp = True
-        self.is_that_wp = is_wp or is_wp2
+        self.is_that = is_wp or is_wp2
         self.is_that_wc = is_wc or is_wc2
 
     def check_meta_tag(self):
