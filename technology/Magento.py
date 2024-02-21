@@ -6,8 +6,8 @@ from technology.Base import Base
 
 
 class Magento(Base):
-    def __init__(self, response, name):
-        super().__init__(response, None, name)
+    def __init__(self, response):
+        super().__init__(response, None, "Magento")
 
     def check_website(self):
         if self.response.status_code == 200:
