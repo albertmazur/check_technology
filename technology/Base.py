@@ -26,7 +26,7 @@ class Base:
                                     title_text,
                                     flags=re.IGNORECASE)
                 title_text = title_text.strip()
-                return title_text if len(title_text) != 0 else "aaa"
+                return title_text if len(title_text) != 0 else ""
             return ""
 
     def get_emails(self):
