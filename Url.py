@@ -23,10 +23,16 @@ class Url:
             return requests.get(page_url, headers=headers, timeout=30)
         except requests.exceptions.SSLError:
             print("Nie działa SSL")
-            return requests.get(page_url, headers=headers, timeout=30, verify=False)
+            try:
+                return requests.get(page_url, headers=headers, timeout=30, verify=False)
+            except requests.RequestException:
+                return self.helper_request(page_url)
         except requests.RequestException:
-            print("Brak dostępu do strony")
-            response = Response
-            response.url = page_url
-            response.status_code = 404
-            return response
+            return self.helper_request(page_url)
+
+    def helper_request(self, page_url):
+        print("Brak dostępu do strony")
+        response = Response
+        response.url = page_url
+        response.status_code = 404
+        return response
