@@ -25,7 +25,7 @@ def check(page_home_url):
         if platform.is_that:
             return platform.get_result()
 
-    return [url.page_home]
+    return None
 
 
 class Main:
@@ -47,7 +47,8 @@ class Main:
             progress = ((index + 1) / self.count_line) * 100
             print(f"Przetworzono {self.start_line + index}/{total_lines} ({progress:.2f}%)")
             data = check(url)
-            file_handler.writer(data)
+            if data is not None:
+                file_handler.writer(data)
 
 
 Main()

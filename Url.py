@@ -1,3 +1,5 @@
+import re
+
 import requests
 from requests import Response
 
@@ -36,3 +38,13 @@ class Url:
         response.url = page_url
         response.status_code = 404
         return response
+
+    def extract_domain(self):
+        domain_pattern = r'https?://(?:www\.)?([\w.-]+)'
+        domains = re.findall(domain_pattern, self.page_home)
+
+        if domains:
+            domain_parts = domains[0].split('.')
+            return domain_parts[-1]
+        else:
+            return None

@@ -52,11 +52,16 @@ class Base:
             if response.status_code == 200:
                 add_emails(response)
 
+        print("test: "+self.url.extract_domain())
         check_page(self.url.create_request())
         check_page(self.url.create_request('/contact'))
-        check_page(self.url.create_request('/kontakt'))
-        check_page(self.url.create_request('/kontakt-2'))
-        check_page(self.url.create_request('/skontaktuj-sie-z-nami'))
+        if self.url.extract_domain() == 'pl':
+            check_page(self.url.create_request('/kontakt'))
+            check_page(self.url.create_request('/kontakt-2'))
+            check_page(self.url.create_request('/skontaktuj-sie-z-nami'))
+        if self.url.extract_domain() == 'uk':
+            check_page(self.url.create_request('/contact-us'))
+            check_page(self.url.create_request('/contactus'))
 
         return list(emails_set) if emails_set else []
 
