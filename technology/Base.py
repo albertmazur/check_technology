@@ -52,7 +52,6 @@ class Base:
             if response.status_code == 200:
                 add_emails(response)
 
-        print("test: "+self.url.extract_domain())
         check_page(self.url.create_request())
         check_page(self.url.create_request('/contact'))
         if self.url.extract_domain() == 'pl':

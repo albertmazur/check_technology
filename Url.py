@@ -1,3 +1,4 @@
+import os
 import re
 
 import requests
@@ -6,6 +7,7 @@ from requests import Response
 
 class Url:
     def __init__(self, page_home):
+        self.slug_country = os.path.basename(os.getenv("PATH_INPUT")).split('.')[0]
         self.page_home = page_home
         self.add_http()
 
