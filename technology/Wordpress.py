@@ -43,7 +43,7 @@ class Wordpress(Base):
             for script in soup.find_all('script', src=True):
                 if '/woocommerce/' in script['src']:
                     version_match = re.search(r'wc.(\d+\.\d+\.\d+)', script['src'])
-                    version = version_match.group(1) if version_match else None
+                    version = version_match.group(1) if version_match else ""
                     is_w = True
                     if version != '':
                         break

@@ -8,6 +8,7 @@ from technology.Base import Base
 class Magento(Base):
     def __init__(self, response):
         super().__init__(response, None, "Magento")
+        self.is_that = self.check_website()
 
     def check_website(self):
         if self.response.status_code == 200:
@@ -17,3 +18,4 @@ class Magento(Base):
                 return True
             else:
                 return False
+        return False

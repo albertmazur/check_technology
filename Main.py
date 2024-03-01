@@ -45,10 +45,10 @@ class Main:
         total_lines = self.start_line + self.count_line - 1
         for index, url in enumerate(lines):
             progress = ((index + 1) / self.count_line) * 100
-            print(f"Przetworzono {self.start_line + index}/{total_lines} ({progress:.2f}%)")
             data = check(url)
             if data is not None:
                 file_handler.writer(data)
+            print(f"Przetworzono {self.start_line + index}/{total_lines} ({progress:.2f}%)")
 
 
 Main()

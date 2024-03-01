@@ -7,7 +7,7 @@ from Url import Url
 
 class Base:
     def __init__(self, response, response_robots, name):
-        self.is_that = None
+        self.is_that = False
         self.name = name
         self.response = response
         self.response_robots = response_robots
