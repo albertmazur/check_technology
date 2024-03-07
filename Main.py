@@ -12,18 +12,19 @@ def check(page_home_url):
 
     url = Url(page_home_url)
     response = url.create_request()
-    response_robots = url.create_request('/robots.txt')
+    if response.status_code != 404:
+        response_robots = url.create_request('/robots.txt')
 
-    platforms = [
-        Wordpress.Wordpress(response, response_robots),
-        Joomla.Joomla(response, response_robots),
-        PrestaShop.PrestaShop(response, response_robots),
-        Magento.Magento(response),
-    ]
+        platforms = [
+            Wordpress.Wordpress(response, response_robots),
+            Joomla.Joomla(response, response_robots),
+            PrestaShop.PrestaShop(response, response_robots),
+            Magento.Magento(response),
+        ]
 
-    for platform in platforms:
-        if platform.is_that:
-            return platform.get_result()
+        for platform in platforms:
+            if platform.is_that:
+                return platform.get_result()
 
     return None
 

@@ -13,7 +13,7 @@ class Url:
 
     def add_http(self):
         if not self.page_home.startswith('http') and not self.page_home.startswith('https'):
-            self.page_home = 'http://' + self.page_home
+            self.page_home = 'https://' + self.page_home
         if self.page_home.endswith('/'):
             self.page_home = self.page_home[:-1]
 
@@ -24,11 +24,11 @@ class Url:
         }
 
         try:
-            return requests.get(page_url, headers=headers, timeout=30)
+            return requests.get(page_url, headers=headers, timeout=15)
         except requests.exceptions.SSLError:
             print("Nie działa SSL")
             try:
-                return requests.get(page_url, headers=headers, timeout=30, verify=False)
+                return requests.get(page_url, headers=headers, timeout=15, verify=False)
             except requests.RequestException:
                 return self.helper_request(page_url)
         except requests.RequestException:
