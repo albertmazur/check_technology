@@ -2,7 +2,8 @@ import os
 import re
 
 import requests
-from requests import Response
+import urllib3
+from requests import Response, RequestException
 
 
 class Url:
@@ -29,9 +30,9 @@ class Url:
             print("Nie działa SSL")
             try:
                 return requests.get(page_url, headers=headers, timeout=15, verify=False)
-            except requests.RequestException:
+            except (RequestException, urllib3.exceptions.LocationParseError):
                 return self.helper_request(page_url)
-        except requests.RequestException:
+        except (RequestException, urllib3.exceptions.LocationParseError):
             return self.helper_request(page_url)
 
     def helper_request(self, page_url):
