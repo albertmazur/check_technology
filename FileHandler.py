@@ -37,7 +37,7 @@ class FileHandler:
     def writer(self, data, mode='a'):
         with open(self.path_output, mode=mode, newline='', encoding='utf-8') as csvfile:
             writer = csv.writer(csvfile)
-            writer.writerow(data)
+            writer.writerows(data)
 
     def writer_header_to_csv(self, header=None):
         self.writer(header, mode='w')

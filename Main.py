@@ -42,14 +42,10 @@ class Main:
         )
 
     def process_urls(self, urls):
-        total_lines = self.start_line + self.count_line - 1
         with Pool(processes=os.cpu_count()) as pool:
             results = pool.map(check, urls)
-            for index, data in enumerate(results):
-                progress = ((index + 1) / self.count_line) * 100
-                if data is not None:
-                    self.file_handler.writer(data)
-                print(f"Przetworzono {self.start_line + index}/{total_lines} ({progress:.2f}%)")
+            self.file_handler.writer(results)
+            print(f"Zapisano do pliku")
 
 
 if __name__ == '__main__':
